@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import PropType from "prop-types";
 import ReactImageFallback from "react-image-fallback";
+import FormInlineMessage from "./FormInlineMessage";
 // const tags = [
 //   { Id: 1, name: "diec" },
 //   { Id: 2, name: "economic" },
@@ -14,30 +15,45 @@ import ReactImageFallback from "react-image-fallback";
 
 class GameForm extends Component {
   state = {
-    name: "",
-    description: "",
-    price: 0,
-    duration: 0,
-    players: "",
-    fetured: false,
-    // tags: [],
-    // genre: [],
-    publisher: 0,
-    thumbnail: ""
+    data: {
+      name: "",
+      description: "",
+      price: 0,
+      duration: 0,
+      players: "",
+      fetured: false,
+      // tags: [],
+      // genre: [],
+      publisher: 0,
+      thumbnail: ""
+    },
+    errors: {
+      name: "This field can't be blank"
+    }
   };
 
   handleSubmit = e => {
     e.preventDefault();
-    console.log(this.state);
+    console.log(this.state.data);
   };
 
-  handleStringchange = e => this.setState({ [e.target.name]: e.target.value });
+  handleStringchange = e =>
+    this.setState({
+      data: { ...this.state.data, [e.target.name]: e.target.value }
+    });
 
   handleNumberchange = e =>
-    this.setState({ [e.target.name]: parseInt(e.target.value, 10) });
+    this.setState({
+      data: {
+        ...this.state.data,
+        [e.target.name]: parseInt(e.target.value, 10)
+      }
+    });
 
   handlecheckboxchange = e =>
-    this.setState({ [e.target.name]: e.target.checked });
+    this.setState({
+      data: { ...this.state.data, [e.target.name]: e.target.checked }
+    });
 
   // toggleTag = tag =>
   //   this.state.tags.includes(tag.Id)
@@ -47,19 +63,21 @@ class GameForm extends Component {
   // toggleGenre = gen => this.setState({ genre: gen.Id });
 
   render() {
+    const { data, errors } = this.state;
     return (
       <form className="ui form" onSubmit={this.handleSubmit}>
         <div className="ui grid">
           <div className="eleven wide column">
-            <div className="field">
+            <div className={errors.name ? "error field" : "field"}>
               <label htmlFor="name">Game name</label>
               <input
                 type="text"
                 name="name"
                 placeholder="Game name"
-                value={this.state.name}
+                value={data.name}
                 onChange={this.handleStringchange}
               />
+              <FormInlineMessage content={errors.name} type="error" />
             </div>
             <div className="field">
               <label htmlFor="description">Game description</label>
@@ -67,14 +85,14 @@ class GameForm extends Component {
                 type="text"
                 name="description"
                 placeholder="Game title"
-                value={this.state.description}
+                value={data.description}
                 onChange={this.handleStringchange}
               />
             </div>
           </div>
           <div className="five wide column">
             <ReactImageFallback
-              src={this.state.thumbnail}
+              src={data.thumbnail}
               fallbackImage="http://via.placeholder.com/250x250"
               alt="Thumbnaill"
               className="ui image"
@@ -88,7 +106,7 @@ class GameForm extends Component {
             type="text"
             name="thumbnail"
             placeholder="Image URL"
-            value={this.state.thumbnail}
+            value={data.thumbnail}
             onChange={this.handleStringchange}
           />
         </div>
@@ -100,7 +118,7 @@ class GameForm extends Component {
               type="number"
               name="price"
               placeholder="price"
-              value={this.state.price}
+              value={data.price}
               onChange={this.handleNumberchange}
             />
           </div>
@@ -111,7 +129,7 @@ class GameForm extends Component {
               type="number"
               name="duration"
               placeholder="duration"
-              value={this.state.duration}
+              value={data.duration}
               onChange={this.handleNumberchange}
             />
           </div>
@@ -122,7 +140,7 @@ class GameForm extends Component {
               type="text"
               name="players"
               placeholder="players"
-              value={this.state.players}
+              value={data.players}
               onChange={this.handleStringchange}
             />
           </div>
@@ -135,7 +153,7 @@ class GameForm extends Component {
               type="checkbox"
               name="fetured"
               placeholder="fetured"
-              checked={this.state.fetured}
+              checked={data.fetured}
               onChange={this.handlecheckboxchange}
             />
           </div>
@@ -149,7 +167,7 @@ class GameForm extends Component {
               <input
                 type="checkbox"
                 id={`Tag-${tag.Id}`}
-                checked={this.state.tags.includes(tag.Id)}
+                checked={data.tags.includes(tag.Id)}
                 onChange={() => this.toggleTag(tag)}
               />
             </div>
@@ -164,7 +182,7 @@ class GameForm extends Component {
               <input
                 type="checkbox"
                 id={`gen-${genre.Id}`}
-                checked={this.state.genre === genre.Id}
+                checked={data.genre === genre.Id}
                 onChange={() => this.toggleGenre(genre)}
               />
             </div>
@@ -175,7 +193,7 @@ class GameForm extends Component {
           <label>Publishers</label>
           <select
             name="publisher"
-            value={this.state.publisher}
+            value={data.publisher}
             onChange={this.handleNumberchange}
           >
             <option value="0">Choose publisher</option>
@@ -189,11 +207,14 @@ class GameForm extends Component {
         </div>
 
         <div className="ui fluid buttons">
-          <button className="ui button" onClick={this.props.cancelGameForm}>Cancel</button>
+          <button className="ui button" onClick={this.props.cancelGameForm}>
+            Cancel
+          </button>
           <div className="or" />
-          <button className="ui primary button" type="submit">Create</button>
+          <button className="ui primary button" type="submit">
+            Create
+          </button>
         </div>
-
       </form>
     );
   }
