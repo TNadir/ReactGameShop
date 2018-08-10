@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-const TopNavigationMenu = ({showGameForm}) => (
+const TopNavigationMenu = ({showGameForm,showPublisherForm}) => (
   <div className="ui stackable menu">
     <div className="item">
       <img
@@ -14,6 +14,10 @@ const TopNavigationMenu = ({showGameForm}) => (
       <i className="icon plus" />Add new game
     </a>
 
+    <a className="item" onClick={showPublisherForm} >
+      <i className="icon plus" />Add new publisher
+    </a>
+
     <div className="right menu">
       <a className="item">Sign In</a>
       <a className="item">
@@ -24,7 +28,8 @@ const TopNavigationMenu = ({showGameForm}) => (
 );
 
 TopNavigationMenu.propTypes = {
-  showGameForm: PropTypes.func.isRequired
+  showGameForm: PropTypes.func.isRequired,
+  showPublisherForm: PropTypes.func.isRequired,
 };
 
 export default TopNavigationMenu;

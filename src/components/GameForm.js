@@ -13,28 +13,59 @@ import FormInlineMessage from "./FormInlineMessage";
 //   { Id: 3, name: "family" }
 // ];
 
+const initialData = {
+  id: null,
+  name: "",
+  description: "",
+  price: 0,
+  duration: 0,
+  players: "",
+  featured: false,
+  // tags: [],
+  // genre: [],
+  publisher: 0,
+  thumbnail: ""
+};
+
 class GameForm extends Component {
   state = {
-    data: {
-      name: "",
-      description: "",
-      price: 0,
-      duration: 0,
-      players: "",
-      fetured: false,
-      // tags: [],
-      // genre: [],
-      publisher: 0,
-      thumbnail: ""
-    },
-    errors: {
-      name: "This field can't be blank"
-    }
+    data: initialData,
+    errors: {},
+    createbuttonName: "Create"
   };
+
+  componentDidMount() {
+    if (this.props.game.id) {
+      this.setState({ data: this.props.game, createbuttonName: "Update"  });
+    }
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.game.id && nextProps.game.id !== this.state.data.id) {
+      this.setState({ data: nextProps.game, createbuttonName: "Update" });
+    }
+    if (!nextProps.game.id) {
+      this.setState({ data: initialData, createbuttonName: "Create" });
+    }
+  }
+
+  validate(data) {
+    const errors = {};
+    if (!data.name) errors.name = "This field can't be blank";
+    if (!data.description) errors.description = "This field can't be blank";
+    if (!data.players) errors.players = "This field can't be blank";
+    if (!data.thumbnail) errors.thumbnail = "This field can't be blank";
+    if (data.duration <= 0) errors.duration = "Too cheap,don't you think?";
+    if (data.publisher === 0) errors.publisher = "Have you choosen publisher?";
+    if (data.price <= 0) errors.price = "Too short, isn't it?";
+    return errors;
+  }
 
   handleSubmit = e => {
     e.preventDefault();
-    console.log(this.state.data);
+    const errors = this.validate(this.state.data);
+    this.setState({ errors: errors });
+    if (Object.keys(errors).length === 0) this.props.submit(this.state.data);
   };
 
   handleStringchange = e =>
@@ -79,7 +110,7 @@ class GameForm extends Component {
               />
               <FormInlineMessage content={errors.name} type="error" />
             </div>
-            <div className="field">
+            <div className={errors.description ? "error field" : "field"}>
               <label htmlFor="description">Game description</label>
               <textarea
                 type="text"
@@ -88,6 +119,7 @@ class GameForm extends Component {
                 value={data.description}
                 onChange={this.handleStringchange}
               />
+              <FormInlineMessage content={errors.description} type="error" />
             </div>
           </div>
           <div className="five wide column">
@@ -100,7 +132,7 @@ class GameForm extends Component {
           </div>
         </div>
 
-        <div className="field">
+        <div className={errors.thumbnail ? "error field" : "field"}>
           <label htmlFor="thumbnail">Thumbnail </label>
           <input
             type="text"
@@ -109,10 +141,11 @@ class GameForm extends Component {
             value={data.thumbnail}
             onChange={this.handleStringchange}
           />
+          <FormInlineMessage content={errors.thumbnail} type="error" />
         </div>
 
         <div className="three fields">
-          <div className="field">
+          <div className={errors.price ? "error field" : "field"}>
             <label htmlFor="price">Price ($)</label>
             <input
               type="number"
@@ -121,9 +154,10 @@ class GameForm extends Component {
               value={data.price}
               onChange={this.handleNumberchange}
             />
+            <FormInlineMessage content={errors.price} type="error" />
           </div>
 
-          <div className="field">
+          <div className={errors.duration ? "error field" : "field"}>
             <label htmlFor="duration">Duration (in second)</label>
             <input
               type="number"
@@ -132,9 +166,10 @@ class GameForm extends Component {
               value={data.duration}
               onChange={this.handleNumberchange}
             />
+            <FormInlineMessage content={errors.duration} type="error" />
           </div>
 
-          <div className="field">
+          <div className={errors.players ? "error field" : "field"}>
             <label htmlFor="players">Players</label>
             <input
               type="text"
@@ -143,17 +178,18 @@ class GameForm extends Component {
               value={data.players}
               onChange={this.handleStringchange}
             />
+            <FormInlineMessage content={errors.players} type="error" />
           </div>
         </div>
 
         <div className="field">
           <div className="inline field">
-            <label htmlFor="fetured">Fetured?</label>
+            <label htmlFor="featured">Fetured?</label>
             <input
               type="checkbox"
-              name="fetured"
-              placeholder="fetured"
-              checked={data.fetured}
+              name="featured"
+              placeholder="featured"
+              checked={data.featured}
               onChange={this.handlecheckboxchange}
             />
           </div>
@@ -189,7 +225,7 @@ class GameForm extends Component {
           ))}
         </div> */}
 
-        <div className="field">
+        <div className={errors.publisher ? "error field" : "field"}>
           <label>Publishers</label>
           <select
             name="publisher"
@@ -204,6 +240,7 @@ class GameForm extends Component {
               </option>
             ))}
           </select>
+          <FormInlineMessage content={errors.publisher} type="error" />
         </div>
 
         <div className="ui fluid buttons">
@@ -212,7 +249,7 @@ class GameForm extends Component {
           </button>
           <div className="or" />
           <button className="ui primary button" type="submit">
-            Create
+            {this.state.createbuttonName}
           </button>
         </div>
       </form>
@@ -227,7 +264,16 @@ GameForm.protoTypes = {
       name: PropType.string.isRequired
     })
   ).isRequired,
-  cancelGameForm: PropType.func.isRequired
+  cancelGameForm: PropType.func.isRequired,
+  submit: PropType.func.isRequired,
+  game: PropType.shape({
+    name: PropType.string.isRequired,
+    thumbnail: PropType.string.isRequired,
+    players: PropType.string.isRequired,
+    price: PropType.number.isRequired,
+    duration: PropType.number.isRequired,
+    featured: PropType.bool.isRequired
+  }).isRequired
 };
 GameForm.defaultProps = {
   publishers: []

@@ -4,6 +4,7 @@ import GameList from "./GameList";
 import _orderBy from "lodash/orderBy";
 import GameForm from "./GameForm";
 import TopNavigationMenu from "./TopNavigationMenu";
+import PublisherForm from "./PublisherForm";
 const games = [
   {
     id: 1,
@@ -59,7 +60,9 @@ class App extends Component {
     super(props);
     this.state = {
       games: [],
-      showGameForm: false
+      showGameForm: false,
+      showPublisherForm: false,
+      selectedGame: {}
     };
   }
 
@@ -77,14 +80,58 @@ class App extends Component {
     this.setState({ games: newGames });
   };
 
+  SaveGame = game => (game.id ? this.UpdateGame(game) : this.AddNewGame(game));
+
+  AddNewGame = game => {
+    var maxgame = this.state.games.reduce(function(prev, current) {
+      return prev.id > current.id ? prev : current;
+    });
+
+    this.setState({
+      games: [...this.state.games, { ...game, id: maxgame.id + 1 }],
+      showGameForm: false
+    });
+  };
+
+  UpdateGame = game => {
+    this.setState({
+      games: this.state.games.map(item => (item.id === game.id ? game : item)),
+      showGameForm: false
+    });
+  };
+
+  selectedGameForm = game =>
+    this.setState({
+      selectedGame: game,
+      showGameForm: true
+    });
+
+  deleteGameForm = game =>
+    this.setState({
+      games: this.state.games.filter(item => item.id !== game.id)
+    });
+
   render() {
-    const numbercolumns = this.state.showGameForm ? "ten" : "sixteen";
+    const numbercolumns =
+      this.state.showGameForm || this.state.showPublisherForm
+        ? "ten"
+        : "sixteen";
     return (
       <div className="ui container">
-
         <TopNavigationMenu
           showGameForm={() =>
-            this.setState({ showGameForm: !this.state.showGameForm })
+            this.setState({
+              showGameForm: true,
+              showPublisherForm: false,
+              selectedGame: {}
+            })
+          }
+          showPublisherForm={() =>
+            this.setState({
+              showPublisherForm: true,
+              showGameForm: false,
+              selectedGame: {}
+            })
           }
         />
 
@@ -92,8 +139,12 @@ class App extends Component {
           {this.state.showGameForm && (
             <div className="six wide column">
               <GameForm
+                submit={this.SaveGame}
                 publishers={publishers}
-                cancelGameForm={() => this.setState({ showGameForm: false })}
+                cancelGameForm={() =>
+                  this.setState({ showGameForm: false, selectedGame: {} })
+                }
+                game={this.state.selectedGame}
               />
             </div>
           )}
@@ -102,13 +153,18 @@ class App extends Component {
             <GameList
               games={this.state.games}
               toggleFeatured={this.toggleFeaturedHandler}
+              editGame={this.selectedGameForm}
+              deleteGame={this.deleteGameForm}
             />
           </div>
+          {this.state.showPublisherForm && (
+            <div className="six wide column right">
+              <PublisherForm />
+            </div>
+          )}
+
 
         </div>
-
-
-
       </div>
     );
   }
